@@ -1,7 +1,13 @@
 -- Luanti
 -- Copyright (C) 2013 sapier
 -- SPDX-License-Identifier: LGPL-2.1-or-later
+-- Modified for BlockyOS by BlockyOS contributors, 2026-10-12: show BlockyOS,
+-- "based on Luanti", and the engine source link above the upstream credits.
 
+
+-- BlockyOS: update both when merging a new upstream Luanti release.
+local UPSTREAM_ENGINE = "Luanti 5.17.0"
+local SOURCE_URL = "https://github.com/jkjackson2000/blockyos-engine"
 
 local function prepare_credits(dest, source)
 	local string = table.concat(source, "\n") .. "\n"
@@ -56,6 +62,9 @@ return {
 		local credits = get_credits()
 
 		table.insert_all(hypertext, {
+			"<heading>BlockyOS</heading>\n",
+			hgettext("Based on $1, by the Luanti contributors credited below.", UPSTREAM_ENGINE), "\n",
+			hgettext("Source code: $1", SOURCE_URL), "\n\n",
 			"<heading>", fgettext_ne("Core Developers"), "</heading>\n",
 		})
 		prepare_credits(hypertext, credits.core_developers)
@@ -84,9 +93,12 @@ return {
 
 		local fs = "image[1.5,0.6;2.5,2.5;" .. core.formspec_escape(logofile) .. "]" ..
 			"style_type[label;valign=center;halign=center]" ..
-			"label[0.1,3.4;5.3,0.5;" ..
+			"label[0.1,3.2;5.3,0.5;" ..
 			core.formspec_escape(version.project .. " " .. version.string) .. "]" ..
-			"button_url[1.5,4.1;2.5,0.8;homepage;luanti.org;https://www.luanti.org/]"
+			"label[0.1,3.65;5.3,0.5;" .. fgettext("Based on $1", UPSTREAM_ENGINE) .. "]" ..
+			"button_url[0.5,4.2;2.2,0.8;source;" .. fgettext("Source code") .. ";" ..
+				core.formspec_escape(SOURCE_URL) .. "]" ..
+			"button_url[2.8,4.2;2.2,0.8;homepage;luanti.org;https://www.luanti.org/]"
 
 		if PLATFORM == "Android" then
 			fs = fs .. "button[0.5,5.1;4.5,0.8;share_debug;" .. fgettext("Share debug log") .. "]"

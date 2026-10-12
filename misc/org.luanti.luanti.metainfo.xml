@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Modified for BlockyOS by BlockyOS contributors, 2026-10-12: visible name BlockyOS. -->
 <component type="desktop-application">
     <id>org.luanti.luanti</id>
     <provides>
@@ -9,7 +10,7 @@
         <id>net.minetest.minetest</id>
     </replaces>
 
-    <name>Luanti</name>
+    <name>BlockyOS</name>
     <summary>Block-based multiplayer game platform</summary>
     <summary xml:lang="de">Blockbasierte Mehrspieler-Spieleplattform</summary>
     <summary xml:lang="fr">Plate-forme de jeu multijoueurs à base de blocs</summary>

@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.12)
+# Modified for BlockyOS by BlockyOS contributors, 2026-10-12: product name BlockyOS,
+# update checker off by default, install BlockyOS notices and license texts.
 if(POLICY CMP0177)
     cmake_policy(SET CMP0177 NEW)
 endif()
 
 # This can be read from ${PROJECT_NAME} after project() is called
 project(luanti)
-set(PROJECT_NAME_CAPITALIZED "Luanti")
+set(PROJECT_NAME_CAPITALIZED "BlockyOS")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
@@ -86,7 +88,9 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type: Debug or Release" FORCE)
 endif()
 
-set(ENABLE_UPDATE_CHECKER (NOT ${DEVELOPMENT_BUILD}) CACHE BOOL
+# BlockyOS: the default URL reports upstream Luanti releases, which the dialog
+# would present as BlockyOS updates. BlockyOS updates ship with the OS.
+set(ENABLE_UPDATE_CHECKER FALSE CACHE BOOL
 	"Whether to enable update checks by default")
 
 # Included stuff
@@ -255,6 +259,10 @@ if(BUILD_CLIENT)
 endif()
 
 install(FILES "README.md" DESTINATION "${DOCDIR}" COMPONENT "Docs")
+install(FILES "BLOCKYOS_NOTICES.md" DESTINATION "${DOCDIR}" COMPONENT "Docs")
+install(FILES "LICENSE.txt" DESTINATION "${DOCDIR}" COMPONENT "Docs")
+install(FILES "COPYING.LESSER" DESTINATION "${DOCDIR}" COMPONENT "Docs")
+install(FILES "LICENSES/Apache-2.0.txt" DESTINATION "${DOCDIR}/licenses" COMPONENT "Docs")
 install(FILES "doc/lua_api.md" DESTINATION "${DOCDIR}" COMPONENT "Docs")
 install(FILES "doc/client_lua_api.md" DESTINATION "${DOCDIR}" COMPONENT "Docs")
 install(FILES "doc/menu_lua_api.md" DESTINATION "${DOCDIR}" COMPONENT "Docs")

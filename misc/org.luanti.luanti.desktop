@@ -1,6 +1,7 @@
+# Modified for BlockyOS by BlockyOS contributors, 2026-10-12: visible name BlockyOS.
 [Desktop Entry]
-Name=Luanti
-GenericName=Luanti
+Name=BlockyOS
+GenericName=BlockyOS
 Comment=Block-based multiplayer game platform
 Comment[de]=Blockbasierte Mehrspieler-Spieleplattform
 Comment[fr]=Plate-forme de jeu multijoueurs à base de blocs
