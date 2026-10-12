@@ -1,0 +1,51 @@
+# BlockyOS engine CI (jkjackson2000/blockyos#17). BlockyOS targets x86_64
+# Linux only, so this fork runs this workflow instead of upstream's
+# multi-platform ones. The BlockyOS game smoke and screenshot tests live in
+# jkjackson2000/blockyos and build the commit pinned in its versions.env.
+name: blockyos
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  linux:
+    name: "linux x86_64 (openssl=${{ matrix.openssl }})"
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        # openssl=0 routes hashing::sha256 through the bundled lib/sha256 too.
+        openssl: [1, 0]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install deps
+        run: |
+          source ./util/ci/common.sh
+          install_linux_deps clang-20 xvfb
+
+      - name: Build
+        run: ./util/ci/build.sh
+        env:
+          CC: clang-20
+          CXX: clang++-20
+          CMAKE_FLAGS: "-DENABLE_OPENSSL=${{ matrix.openssl }}"
+
+      - name: Product name is BlockyOS
+        run: |
+          ./bin/luanti --version | tee version.txt
+          grep -q '^BlockyOS ' version.txt
+
+      - name: Unit tests
+        run: ./bin/luanti --run-unittests
+
+      - name: Bundled SHA-256 tests
+        run: ./bin/luanti --run-unittests --test-module TestSha256
+
+      - name: Integration test + devtest (server and headless client)
+        run: ./util/test_multiplayer.sh
+
+      - name: Singleplayer test (software GL3)
+        run: clientconf="video_driver=opengl3" xvfb-run ./util/test_singleplayer.sh

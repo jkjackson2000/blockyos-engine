@@ -138,6 +138,7 @@ Added:
 
 | File | Purpose |
 |---|---|
+| `.github/workflows/blockyos.yml` | BlockyOS x86_64 Linux CI: build with and without OpenSSL, unit tests, devtest integration and software-rendered singleplayer tests. Upstream workflows are left in place but not enabled on this fork. |
 | `BLOCKYOS_NOTICES.md` | This file. |
 | `LICENSES/Apache-2.0.txt` | Apache License 2.0 text (from <https://www.apache.org/licenses/LICENSE-2.0.txt>), for the Apache-licensed fonts and textures. |
 | `src/unittest/test_sha256.cpp` | Unit test for `lib/sha256`. |
