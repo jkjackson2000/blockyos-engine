@@ -1,103 +1,87 @@
-/* libcrypto/sha/sha.h */
-/* Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)
- * All rights reserved.
+/*
+ * SPDX-License-Identifier: MIT
+ * Copyright (c) 2026 BlockyOS contributors
  *
- * This package is an SSL implementation written
- * by Eric Young (eay@cryptsoft.com).
- * The implementation was written so as to conform with Netscapes SSL.
+ * SHA-224 and SHA-256 as specified in NIST FIPS 180-4.
  *
- * This library is free for commercial and non-commercial use as long as
- * the following conditions are aheared to.  The following conditions
- * apply to all code found in this distribution, be it the RC4, RSA,
- * lhash, DES, etc., code; not just the SSL code.  The SSL documentation
- * included with this distribution is covered by the same copyright terms
- * except that the holder is Tim Hudson (tjh@cryptsoft.com).
+ * Original implementation written for the BlockyOS engine (a fork of
+ * Luanti); it replaces the upstream lib/sha256 code. See BLOCKYOS_NOTICES.md.
  *
- * Copyright remains Eric Young's, and as such any Copyright notices in
- * the code are not to be removed.
- * If this package is used in a product, Eric Young should be given attribution
- * as the author of the parts of the library used.
- * This can be in the form of a textual message at program startup or
- * in documentation (online or textual) provided with the package.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    "This product includes cryptographic software written by
- *     Eric Young (eay@cryptsoft.com)"
- *    The word 'cryptographic' can be left out if the rouines from the library
- *    being used are not cryptographic related :-).
- * 4. If you include any Windows specific code (or a derivative thereof) from
- *    the apps directory (application code) you must include an acknowledgement:
- *    "This product includes software written by Tim Hudson (tjh@cryptsoft.com)"
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * THIS SOFTWARE IS PROVIDED BY ERIC YOUNG ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- * The licence and distribution terms for any publically available version or
- * derivative of this code cannot be changed.  i.e. this code cannot simply be
- * copied and put under another distribution licence
- * [including the GNU Public Licence.]
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
+#ifndef BLOCKYOS_MY_SHA256_H
+#define BLOCKYOS_MY_SHA256_H
+
 #include <stddef.h>
+#include <stdint.h>
 
-#ifndef HEADER_SHA_H
-#define HEADER_SHA_H
-
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
+#define SHA224_DIGEST_LENGTH 28
+#define SHA256_DIGEST_LENGTH 32
+
 /*
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * ! SHA_LONG has to be at least 32 bits wide.                    !
- * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ * Callers use the familiar SHA256_Init()-style names. Those names are also
+ * exported by OpenSSL's libcrypto, which the engine links when ENABLE_OPENSSL
+ * is on. Mapping them to distinct link symbols keeps the two implementations
+ * from interposing on each other, so code that includes this header always
+ * gets this implementation.
  */
+#define SHA224_Init   blockyos_sha224_init
+#define SHA224_Update blockyos_sha224_update
+#define SHA224_Final  blockyos_sha224_final
+#define SHA224        blockyos_sha224
+#define SHA256_Init   blockyos_sha256_init
+#define SHA256_Update blockyos_sha256_update
+#define SHA256_Final  blockyos_sha256_final
+#define SHA256        blockyos_sha256
 
-#define SHA_LONG unsigned int
-
-#define SHA_LBLOCK	16
-#define SHA_CBLOCK	(SHA_LBLOCK*4)	/* SHA treats input data as a
-					 * contiguous array of 32 bit
-					 * wide big-endian values. */
-
-#define SHA256_CBLOCK	(SHA_LBLOCK*4)	/* SHA-256 treats input data as a
-					 * contiguous array of 32 bit
-					 * wide big-endian values. */
-#define SHA256_DIGEST_LENGTH	32
-
-typedef struct SHA256state_st {
-	SHA_LONG h[8];
-	SHA_LONG Nl, Nh;
-	SHA_LONG data[SHA_LBLOCK];
-	unsigned int num, md_len;
+/* Shared by SHA-224 and SHA-256; treat the fields as private. */
+typedef struct blockyos_sha256_ctx {
+	uint32_t state[8];         /* intermediate hash value H(i) */
+	uint64_t length_bits;      /* message length so far, in bits */
+	unsigned char block[64];   /* pending input that is not yet a full block */
+	size_t block_used;         /* number of bytes pending in block */
+	unsigned int digest_len;   /* 28 for SHA-224, 32 for SHA-256 */
 } SHA256_CTX;
+
+/* The Init/Update/Final functions return 1 on success and 0 on misuse. */
+int SHA224_Init(SHA256_CTX *c);
+int SHA224_Update(SHA256_CTX *c, const void *data, size_t len);
+int SHA224_Final(unsigned char *md, SHA256_CTX *c);
 
 int SHA256_Init(SHA256_CTX *c);
 int SHA256_Update(SHA256_CTX *c, const void *data, size_t len);
 int SHA256_Final(unsigned char *md, SHA256_CTX *c);
-unsigned char *SHA256(const unsigned char *d, size_t n, unsigned char *md);
-void SHA256_Transform(SHA256_CTX *c, const unsigned char *data);
 
-#ifdef  __cplusplus
+/*
+ * One-shot digests of d[0..n). md must have room for the digest; the
+ * functions return md, or NULL if md is NULL.
+ */
+unsigned char *SHA224(const unsigned char *d, size_t n, unsigned char *md);
+unsigned char *SHA256(const unsigned char *d, size_t n, unsigned char *md);
+
+#ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* BLOCKYOS_MY_SHA256_H */
